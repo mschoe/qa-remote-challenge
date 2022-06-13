@@ -42,7 +42,7 @@ For this exercise we use java script and the [node.js client](https://github.com
 
 The open source library [zeebe-node](https://www.npmjs.com/package/zeebe-node) provides a Zeebe client.
 
-```
+```bash
 npm install --save zeebe-node
 ```
 
@@ -68,13 +68,13 @@ const zbc = new ZBClient({
 
 To deploy a process use the following command and specify the filepath of the BPMN file.
 
-```
+```javascript
 await zbc.deployProcess(['../resources/hiring-process.bpmn'])
 ```
 
 To start a new instance you have to specify the `bpmnProcessId`, i.e. `hiring-process` (which is defined in the BPMN file). Furthermore it is possible to add [process variables](https://docs.camunda.io/docs/components/concepts/variables/). Variables are part of a process instance and represent the data of the instance. 
 
-```
+```javascript
 const result = await zbc.createProcessInstance('hiring-process', {
 	message_content: 'Hello from the Camunda remote test challenge',
 })
@@ -97,7 +97,7 @@ By selecting the process instance ID in the list of instances you can drill down
 In the next step we will spin up a [job worker](https://docs.camunda.io/docs/components/concepts/job-workers/). This is a pice of code connected to the [Service Task](https://docs.camunda.io/docs/components/modeler/bpmn/service-tasks/) in our process, capable of performing a particular task. In our process we will simply print out the variable which we added while starting the process instance.  
 To complete a service task, a job worker has to be subscribed to the task type defined in the process, i.e. hiring.  
 
-```
+```javascript
 zbc.createWorker({
 	taskType: 'hiring',
 	taskHandler: (job, _, worker) => {
