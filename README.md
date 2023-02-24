@@ -9,36 +9,32 @@ The [process](https://docs.camunda.io/docs/components/concepts/processes/) basic
 
 ## Sign up for Camunda Platform 8
 
-Visit [camunda.io/signup](https://accounts.cloud.camunda.io/signup) to create a new account. After login, you'll see the console overview page. This is the central place to manage your clusters.
+Visit [camunda.io/signup](https://accounts.cloud.camunda.io/signup) to create a new account. After login, you'll see the console overview page. This is the central place to manage your clusters. We call it the Console.
 
 Docs: https://docs.camunda.io/docs/guides/getting-started/
 
 
-### Create a new Cluster
+### The Cluster 
 
-You must create a cluster if you have a new Camunda Platform 8 account.  
-
-1. To create a cluster, click the Clusters tab, and click Create New Cluster.
-2. Name your cluster. For the purpose of this guide, we recommend using the Stable channel, the latest generation, and the region closest to you. Click Create.
-3. Your cluster will take a few moments to create. Check the satus on the Clusters page or by clicking into the cluster itself and looking at the Applications Overview.
+A cluster is a container where our process engine and its web applications are running. With your trial account you can run one cluster and luckely there is already a cluster configured for our task.   
+Your cluster will take a few moments to create. Check the satus on the Clusters page or by clicking into the cluster itself and looking at the Applications Overview. If you encounter any problem and the status of the cluster does not turn green you can simply delete the cluster and create a new one.
 
 
-### Create credentials for your Zeebe client
+### Cluster Credentials for your Zeebe Client
 
-To interact with your Camunda Platform 8 cluster, you'll use the Zeebe client. First, you'll need to create credentials.  
+To interact with your cluster, you'll use a client for that we create credentials now.  
 
-1. The main page for Console should be open on another tab. Use Console to navigate to your clusters either through the navigation Clusters or by using the section under View all on the Clusters section of the main dashboard. Click on your existing cluster. This will open the Overview for your cluster, where you can find your cluster id and region. You will need this information later when creating a worker in the next section.
-2. Navigate to the API tab. Click Create.
-3. Provide a descriptive name for your client. For this challenge, the scope can be the default Zeebe scope. Click Create.
-4. Your client credentials can be downloaded at this point. You will need your client id and your client secret when creating a worker in the next section. Furtermore you have to look up the cluster id which can be found in the connection information of your client.
+1. Select your cluster, open the API tab and click **Create new Client**.
+2. Provide a descriptive name for your client. For this challenge, the scope can be the default Zeebe scope. Click Create.
+3. On the next page you will see the client credentials. Select the **Env Vars** tab and download the credentials into your working directory. Make the credentials available as environment variables for your node application. 
 
 
 ## Build a Process Application
 
 For this exercise we use java script and the [node.js client](https://github.com/camunda/camunda-platform-get-started/tree/main/nodejs). 
 
-### Install Dependencies
 
+### Install Dependencies
 
 The open source library [zeebe-node](https://www.npmjs.com/package/zeebe-node) provides a Zeebe client.
 
@@ -47,24 +43,20 @@ npm install --save zeebe-node
 ```
 
 
-### Connect your code to the cluster 
+### Connect your code to the cluster and deploy a process
 
-If we want to connect to a Camunda Platform 8 cluster we need the `clusterId` from the [Clusters details page](https://docs.camunda.io/docs/components/console/manage-clusters/create-cluster/), a `clientId` and `clientSecret` from a [client credentials pair](https://docs.camunda.io/docs/components/console/manage-clusters/manage-api-clients/) (as described above).
+Once you injected the client credentials as envronment variables the Zeebe client takes the configuration from the environment as follows:
 
 
 ```javascript
 const { ZBClient } = require('zeebe-node')
 
-const zbc = new ZBClient({
-	camundaCloud: {
-		clusterId: '365eed98-16c1-4096-bb57-eb8828e6661e',
-		clientId: 'GZVK3ALYy~qCcD3MYq~sf0GIszNzLE_z',
-		clientSecret: '.RPbZc6q0d6uzRbB4LW.B8lCpsxbBEpmBX0AHQGzINf3.KK9RkzZW1aDaZ-7WYNJ',
-	},
-})
+const zbc = new ZBClient()
 ```
 
-### Deploy Process and Start Instance
+If you encounter connection problems please check your environment varibales ```echo $EEBE_CLIENT_ID```
+
+### Deploy a Process and Start an Instance of the Process
 
 To deploy a process use the following command and specify the filepath of the BPMN file.
 
@@ -100,9 +92,9 @@ To complete a service task, a job worker has to be subscribed to the task type d
 ```javascript
 zbc.createWorker({
 	taskType: 'hiring',
-	taskHandler: (job, _, worker) => {
+	taskHandler: job => {
 		const { message_content } = job.variables
-		worker.log(`Message: ${message_content}`)
+		console.log(`Message: ${message_content}`)
 		job.complete()
 	}
 })
